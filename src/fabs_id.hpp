@@ -151,7 +151,7 @@ public:
     std::shared_ptr<fabs_peer> m_addr1, m_addr2;
     uint8_t  m_hop;
     uint16_t m_vlanid;
-
+    uint32_t m_spanid;
     uint32_t get_hash() const;
 
 private:

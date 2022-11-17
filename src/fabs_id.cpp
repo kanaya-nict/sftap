@@ -26,7 +26,7 @@ fabs_id::set_iph(char *iph, uint16_t vlanid, char **l4hdr, int *len)
 
     *l4hdr = NULL;
     m_vlanid = vlanid;
-
+    m_spanid = 0xFFFF;
     switch (protocol) {
     case 0x40:
     {
@@ -55,6 +55,9 @@ fabs_id::set_iph(char *iph, uint16_t vlanid, char **l4hdr, int *len)
 
             *l4hdr = (char*)udph;
         } else if (iph4->ip_p == IPPROTO_ICMP) {
+            *l4hdr = iph + iph4->ip_hl * 4;
+        }else if (iph4->ip_p == IPPROTO_GRE) {
+	  //* GREにはportがない
             *l4hdr = iph + iph4->ip_hl * 4;
         }
 

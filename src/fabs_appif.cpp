@@ -1536,6 +1536,13 @@ fabs_appif::write_event(int fd, const fabs_id_dir &id_dir, ptr_ifrule ifrule,
             s += boost::lexical_cast<std::string>(ntohs(id_dir.m_id.m_vlanid));
         }
 
+        s += ",spanid=";
+        if (id_dir.m_id.m_spanid == 0xffff) {
+            s += "-1";
+        } else {
+	  s += boost::lexical_cast<std::string>(id_dir.m_id.m_spanid);
+        }
+
         s += ",hop=";
         s += boost::lexical_cast<std::string>((int)id_dir.m_id.m_hop);
 
