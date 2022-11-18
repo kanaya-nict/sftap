@@ -172,7 +172,7 @@ public:
     }
 
     timeval m_tm;
-
+    int m_spanid=-1;
 private:
     char *m_ptr;
     int   m_pos;

@@ -42,6 +42,8 @@ public:
 
     void produce(int idx, ptr_fabs_bytes buf);
     inline void produce(int idx, const char *buf, int len, const timeval &tm);
+    inline const uint8_t *get_ip_hdr(const uint8_t *bytes, uint32_t len,
+                                     uint8_t &proto, uint16_t &vlanid);
 
 private:
     std::mutex m_mutex_init;
@@ -50,8 +52,6 @@ private:
     volatile bool m_is_break;
     volatile uint64_t m_num_dropped;
 
-    inline const uint8_t *get_ip_hdr(const uint8_t *bytes, uint32_t len,
-                                     uint8_t &proto, uint16_t &vlanid);
 
     const fabs_dlcap *m_dlcap;
     ptr_fabs_appif m_appif;

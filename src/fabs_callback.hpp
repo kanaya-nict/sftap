@@ -53,7 +53,10 @@ private:
     fabs_tcp **m_tcp;
     fabs_udp m_udp;
     fabs_icmp m_icmp;
-
+    fabs_ether* m_ether;
+public:
+    void set_ether(fabs_ether* ether){ m_ether = ether;}
+    uint32_t calc_hash(const uint8_t *bytes);
 };
 
 #endif

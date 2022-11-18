@@ -36,7 +36,8 @@ fabs_ether::fabs_ether(fabs_conf &conf, const fabs_dlcap *dlcap)
     m_appif->read_conf(conf);
     m_callback.set_appif(m_appif);
     m_appif->run();
-
+    m_callback.set_ether(this);
+    
     int numtcp = m_appif->get_num_tcp_threads();
 
     m_queue = new fabs_cb<ptr_fabs_bytes>[numtcp];
