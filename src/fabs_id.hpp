@@ -48,6 +48,7 @@ struct fabs_appif_header {
     uint8_t  match;    // 0: matched up's regex, 1: matched down's regex, 2: none
     uint8_t  reason;   // 0: normal, 1: reset, 2: timeout, 3: compromised
     uint16_t vlanid;   // vlan ID, big endian
+    uint32_t netid;    // netid
     uint8_t  unused;   // safety packing for 32 bytes boundary
 } __attribute__((packed, aligned(32)));
 
@@ -88,13 +89,13 @@ public:
     fabs_id() : m_hop(0) { }
     virtual ~fabs_id(){ };
 
-    fabs_direction set_iph(char *iph, uint16_t vlanid, char **l4hdr, int *len);
+    fabs_direction set_iph(char *iph, uint16_t vlanid, char **l4hdr, int *len, uint32_t netid);
     void set_appif_header(fabs_appif_header &header);
     void print_id() const;
 
     bool operator< (const fabs_id &rhs) const {
         if (m_hop == rhs.m_hop) {
-            if (m_vlanid == rhs.m_vlanid) {
+            if ((m_vlanid == rhs.m_vlanid) && (m_netid == rhs.m_netid)) {
                 if (m_l3_proto == rhs.m_l3_proto) {
                     if (m_l4_proto == rhs.m_l4_proto) {
                         int n = memcmp(m_addr1.get(), rhs.m_addr1.get(),
@@ -111,8 +112,12 @@ public:
 
                 return m_l3_proto < rhs.m_l3_proto;
             }
-
-            return m_vlanid < rhs.m_vlanid;
+            if(m_netid == rhs.m_netid){
+              return m_vlanid < rhs.m_vlanid;
+            }
+            else{
+              return m_netid < rhs.m_netid;
+            }
         }
 
         return m_hop < rhs.m_hop;
@@ -142,6 +147,11 @@ public:
             return s + ":" + addr1 + ":" + addr2;
         }
 
+        if (m_netid != 0xffffffff) {
+            auto s = boost::lexical_cast<std::string>(ntohs(m_netid));
+            return s + ":" + addr1 + ":" + addr2;
+        }
+
         return addr1 + ":" + addr2;
     }
 
@@ -151,7 +161,7 @@ public:
     std::shared_ptr<fabs_peer> m_addr1, m_addr2;
     uint8_t  m_hop;
     uint16_t m_vlanid;
-    uint32_t m_spanid;
+    uint32_t m_netid;
     uint32_t get_hash() const;
 
 private:

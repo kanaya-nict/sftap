@@ -202,7 +202,7 @@ fabs_ether::consume(int idx)
 
                     if (off & IP_MF || (off & 0x1fff) > 0) {
                         // produce fragment packet
-                        fabs_fragment::qtype q(std::move(buf), vlanid);
+                        fabs_fragment::qtype q(std::move(buf), vlanid, buf->m_netid);
                         m_queue_frag.push(q);
 
                         if (! m_is_consuming_frag &&

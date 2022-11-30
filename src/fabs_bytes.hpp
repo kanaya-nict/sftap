@@ -27,7 +27,7 @@ public:
         int len = strlen(str);
         try {
             m_ptr = new char[len];
-        } catch (std::bad_alloc e) {
+        } catch (const std::bad_alloc& e) {
             std::cerr << __FILE__ << ":" << __LINE__ << ":" << ":"
                       <<__func__ << ": " << e.what() << std::endl;
             m_len = 0;
@@ -93,7 +93,7 @@ public:
             char z[m_len - m_pos];
             memset(z, 0, m_len - m_pos);
             return memcmp(z, m_ptr, m_len - m_pos) == 0 ? true : false;
-        } catch (std::bad_alloc e) {
+        } catch (const std::bad_alloc& e) {
             std::cerr << __FILE__ << ":" << __LINE__ << ":" << ":"
                       <<__func__ << ": " << e.what() << std::endl;
             return false;
@@ -103,7 +103,7 @@ public:
     void alloc(size_t len) {
         try {
             m_ptr = new char[len];
-        } catch (std::bad_alloc e) {
+        } catch (const std::bad_alloc& e) {
             std::cerr << __FILE__ << ":" << __LINE__ << ":" << ":"
                       <<__func__ << ": " << e.what() << ", len = " << len
                       << std::endl;
@@ -124,7 +124,7 @@ public:
         try {
             delete[] m_ptr;
             m_ptr = new char[len];
-        } catch (std::bad_alloc e) {
+        } catch (const std::bad_alloc& e) {
             std::cerr << __func__ << e.what() << std::endl;
             m_len = 0;
             m_pos = 0;
@@ -172,7 +172,7 @@ public:
     }
 
     timeval m_tm;
-    int m_spanid=-1;
+    int m_netid=0xFFFFFFFF;
 private:
     char *m_ptr;
     int   m_pos;

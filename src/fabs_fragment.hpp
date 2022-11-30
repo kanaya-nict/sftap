@@ -26,13 +26,16 @@ public:
     struct qtype {
         ptr_fabs_bytes m_buf;
         uint16_t       m_vlanid;
-
+        uint32_t       m_netid;
+        
         qtype() { }
-        qtype(ptr_fabs_bytes buf, uint16_t vlanid) : m_buf(std::move(buf)), m_vlanid(vlanid) { }
+        qtype(ptr_fabs_bytes buf, uint16_t vlanid, uint32_t netid)
+            : m_buf(std::move(buf)), m_vlanid(vlanid), m_netid(netid) { }
 
         fabs_fragment::qtype& operator=(fabs_fragment::qtype &rhs) {
             m_buf    = std::move(rhs.m_buf);
             m_vlanid = rhs.m_vlanid;
+            m_netid = rhs.m_netid;
             return *this;
         }
     };
@@ -54,9 +57,10 @@ private:
         uint32_t m_ip_dst;
         uint16_t m_id;
         uint16_t m_vlanid;
+        uint32_t m_netid;
 
         fragments ();
-        fragments(const ip *iph4, ptr_fabs_bytes bytes, uint16_t vlanid);
+        fragments(const ip *iph4, ptr_fabs_bytes bytes, uint16_t vlanid, uint32_t netid);
         virtual ~fragments();
 
         bool operator< (const fragments &rhs) const;

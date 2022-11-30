@@ -14,7 +14,7 @@ fabs_fragment::fragments::fragments ()
 
 }
 
-fabs_fragment::fragments::fragments(const ip *iph4, ptr_fabs_bytes bytes, uint16_t vlanid)
+fabs_fragment::fragments::fragments(const ip *iph4, ptr_fabs_bytes bytes, uint16_t vlanid, uint32_t netid)
     : m_bytes(new std::map<int, ptr_fabs_bytes>),
       m_is_last(false)
 {
@@ -34,6 +34,7 @@ fabs_fragment::fragments::fragments(const ip *iph4, ptr_fabs_bytes bytes, uint16
     m_ip_dst = ntohl(iph4->ip_dst.s_addr);
     m_id     = ntohs(iph4->ip_id);
     m_vlanid = ntohs(vlanid);
+    m_netid  = ntohl(netid);
 }
 
 fabs_fragment::fragments::~fragments ()
@@ -63,7 +64,8 @@ fabs_fragment::fragments::operator== (const fragments &rhs) const {
     return (m_ip_src == rhs.m_ip_src &&
             m_ip_dst == rhs.m_ip_dst &&
             m_id     == rhs.m_id     &&
-            m_vlanid == rhs.m_vlanid);
+            m_vlanid == rhs.m_vlanid &&
+            m_netid == rhs.m_netid);
 }
 
 fabs_fragment::fabs_fragment(fabs_ether &fether, ptr_fabs_appif appif) :
@@ -139,11 +141,12 @@ fabs_fragment::input_ip(qtype &buf)
         frag.m_ip_dst = ntohl(iph4->ip_dst.s_addr);
         frag.m_id     = ntohs(iph4->ip_id);
         frag.m_vlanid = ntohs(buf.m_vlanid);
+        frag.m_netid  = buf.m_netid;
 
         std::unique_lock<std::mutex> lock(m_mutex);
         auto it = m_fragments.find(frag);
         if (it == m_fragments.end()) {
-            m_fragments.insert(fragments(iph4, std::move(buf.m_buf), buf.m_vlanid));
+            m_fragments.insert(fragments(iph4, std::move(buf.m_buf), buf.m_vlanid, buf.m_netid));
         } else {
             auto it2 = it->m_bytes->find(offset);
             if (it2 == it->m_bytes->end()) {
@@ -202,7 +205,7 @@ fabs_fragment::defragment(const fragments &frg, ptr_fabs_bytes &buf)
         ether_header *ehdr = (ether_header*)buf->get_head();
         memset(ehdr, 0, sizeof(ether_header));
         ehdr->ether_type = htons(ETHERTYPE_IP);
-    } else {
+    } else { // VLANフレームを再構築する
         ehdrlen = sizeof(ether_header) + sizeof(vlanhdr);
         buf->alloc(frg.m_size + hlen + ehdrlen);
         if (buf->get_len() == 0)

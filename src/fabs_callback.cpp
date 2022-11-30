@@ -53,7 +53,7 @@ fabs_callback::operator() (int idx, ptr_fabs_bytes buf, uint16_t vlanid) {
     char          *l4hdr;
     int            len; // payload length
 
-    dir = id.set_iph(buf->get_head(), vlanid, &l4hdr, &len);
+    dir = id.set_iph(buf->get_head(), vlanid, &l4hdr, &len, buf->m_netid);
 
     if (l4hdr == NULL || dir == FROM_NONE) {
         return;
@@ -67,15 +67,15 @@ fabs_callback::operator() (int idx, ptr_fabs_bytes buf, uint16_t vlanid) {
             return;
         }
     }
-    id.m_spanid = buf->m_spanid;
+    id.m_netid = buf->m_netid;
     switch (id.get_l4_proto()) {
     case IPPROTO_GRE:{
       char *d = buf->get_head();
-      uint32_t spanid = (d[8+2] * 256 + d[8+2+1])&0x3FF;
+      uint32_t netid = (d[8+2] * 256 + d[8+2+1])&0x3FF;
       std::cout << "GRE packet found" << std::endl;
       // GRE:8octed, ERSPAN: 12octed
       buf->skip(8+12);
-      buf->m_spanid = spanid;
+      buf->m_netid = netid;
       int hash = calc_hash((uint8_t*)buf->get_head());
       m_ether->produce(hash & (m_appif->get_num_tcp_threads() - 1), std::move(buf));}
       break;
