@@ -438,13 +438,13 @@ read_loopback7(int fd, fabs_appif *appif)
             header->l4_proto = l4_proto;
 
             int vlanid;
-
+            int netid;
             try {
                 header->l4_port1 = boost::lexical_cast<int>(h["port1"]);
                 header->l4_port2 = boost::lexical_cast<int>(h["port2"]);
                 header->hop      = boost::lexical_cast<int>(h["hop"]);
                 vlanid = boost::lexical_cast<int>(h["vlan"]);
-
+                netid = boost::lexical_cast<int>(h["netid"]);
                 auto it_len = h.find("len");
                 if (it_len != h.end()) {
                     header->len = boost::lexical_cast<int>(it_len->second);
@@ -463,7 +463,8 @@ read_loopback7(int fd, fabs_appif *appif)
                 header->vlanid = 0xffff;
             else
                 header->vlanid = htons((uint16_t)vlanid);
-
+            header->netid=netid;
+            
             if (h["event"] == "CREATED") {
                 header->event = STREAM_CREATED;
             } else if (h["event"] == "DESTROYED") {
@@ -1537,7 +1538,7 @@ fabs_appif::write_event(int fd, const fabs_id_dir &id_dir, ptr_ifrule ifrule,
         }
 
         s += ",netid=";
-        if (id_dir.m_id.m_netid == 0xffff) {
+        if (id_dir.m_id.m_netid == 0xffffffff) {
             s += "-1";
         } else {
             s += boost::lexical_cast<std::string>(id_dir.m_id.m_netid);
@@ -1649,6 +1650,7 @@ fabs_appif::write_event(int fd, const fabs_id_dir &id_dir, ptr_ifrule ifrule,
         header->match    = match;
         header->reason   = reason;
         header->vlanid   = id_dir.m_id.m_vlanid;
+        header->netid    = id_dir.m_id.m_netid;
 
         memcpy(&header->tm, tm, sizeof(*tm));
 
